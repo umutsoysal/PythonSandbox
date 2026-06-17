@@ -1,23 +1,26 @@
-"""
-Spinner Thread
-"""
+'''
+Spinner Async
+'''
 import itertools
 import math
 import time
-from threading import Thread, Event
+import asyncio
 
-
-def spin(msg: str, done: Event) -> None:
+async def spin(msg: str) -> None:
     for char in itertools.cycle('\|/-'):
         status = f'\r{char} {msg}'
         print(status, flush=True, end='')
-        if done.wait(0.1):
+        try:
+            await asyncio.sleep(0.1)
+        except asyncio.CancelledError:
             break
     blanks = ' ' * len(status)
     print(f'\r{blanks}\r', end='')
 
-def slow() -> int:
-    time.sleep(3)
+async def slow() -> int:
+    #time.sleep(3)
+    #await asyncio.sleep(3)
+    is_prime(5000111000222021)  # Example number to check for primality
     return 42
 
 def is_prime(n: int) -> bool:
@@ -34,21 +37,17 @@ def is_prime(n: int) -> bool:
         if n % i == 0:
             return False
     return True
+    
 
-def supervisor() -> int:
-    done = Event()
-    spinner = Thread(target=spin, args=['thinking...', done])
-    print('spinner object:', spinner)
-    spinner.start()
-
-    result = is_prime(5000111000222021)  # Example number to check for primality
-    done.set()
-    spinner.join()
+async def supervisor() -> int:
+    spinner = asyncio.create_task(spin('thinking!'))
+    print('spinner object:', spinner)    
+    result = await slow()
+    spinner.cancel()
     return result
 
 def main() -> None:
-    result = supervisor()
+    result = asyncio.run(supervisor())
     print('Answer:', result)
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__main__':    main()

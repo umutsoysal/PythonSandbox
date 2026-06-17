@@ -1,13 +1,13 @@
-"""
-Spinner Thread
-"""
+'''
+Spinner Process
+'''
 import itertools
 import math
 import time
-from threading import Thread, Event
+from multiprocessing import Process, Event
+from multiprocessing import synchronize
 
-
-def spin(msg: str, done: Event) -> None:
+def spin(msg: str, done: synchronize.Event) -> None:
     for char in itertools.cycle('\|/-'):
         status = f'\r{char} {msg}'
         print(status, flush=True, end='')
@@ -37,7 +37,7 @@ def is_prime(n: int) -> bool:
 
 def supervisor() -> int:
     done = Event()
-    spinner = Thread(target=spin, args=['thinking...', done])
+    spinner = Process(target=spin, args=['thinking!', done])
     print('spinner object:', spinner)
     spinner.start()
 
@@ -50,5 +50,4 @@ def main() -> None:
     result = supervisor()
     print('Answer:', result)
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__main__':    main()
